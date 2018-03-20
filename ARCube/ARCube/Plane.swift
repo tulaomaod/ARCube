@@ -12,12 +12,18 @@ import ARKit
 
 class Plane: SCNNode {
     var anthor: ARPlaneAnchor!
-    var planeGeometry: SCNPlane!
-    init(withAnthor anthor: ARPlaneAnchor) {
+    var planeGeometry: SCNBox!
+    
+    init(withAnthor anthor: ARPlaneAnchor, isHidden hidden: Bool ) {
         super.init()
         
         self.anthor = anthor
-        planeGeometry = SCNPlane(width: CGFloat(anthor.extent.x), height: CGFloat(anthor.extent.z))
+        
+        // 使用 SCNBox 替代 SCNPlane 以便场景中的几何体与平面交互。
+        // 为了让物理引擎正常工作，需要给平面一些高度以便场景中的几何体与其交互
+        let planeHeight = 0.01
+        planeGeometry = SCNBox(width: CGFloat(anthor.extent.x), height: CGFloat(planeHeight), length: CGFloat(anthor.extent.z), chamferRadius: 0)
+        
         
         // 网格材质
         let material = SCNMaterial()
@@ -25,10 +31,24 @@ class Plane: SCNNode {
         material.lightingModel = .physicallyBased
         planeGeometry.materials = [material]
         
+        // 由于正在使用立方体，但却只需要渲染表面的网格，所以让其他几条边都透明
+        let transpatentMaterial = SCNMaterial()
+        transpatentMaterial.diffuse.contents = UIColor(white: 1.0, alpha: 0)
+        if hidden {
+            planeGeometry.materials = [transpatentMaterial, transpatentMaterial, transpatentMaterial,
+            transpatentMaterial, transpatentMaterial, transpatentMaterial]
+        } else {
+            planeGeometry.materials = [transpatentMaterial, transpatentMaterial, transpatentMaterial,
+            transpatentMaterial, material, transpatentMaterial]
+        }
+
         // 平面节点
         let planeNode = SCNNode(geometry: planeGeometry)
-        planeNode.position = SCNVector3(anthor.extent.x, 0, anthor.extent.z)
+        // 由于平面有一些高度，将其向下移动到实际的表面
+        planeNode.position = SCNVector3(0, -planeHeight / 2.0, 0)
         
+        // 设置物理刚体
+        planeNode.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: planeGeometry, options: nil))
         
         // SceneKit 里的平面默认是垂直的，所以需要旋转90度来匹配 ARKit 中的平面
         planeNode.transform = SCNMatrix4MakeRotation(-.pi / 2.0, 1.0, 0, 0)
@@ -51,6 +71,9 @@ class Plane: SCNNode {
         // plane 更新后变换没变但 center 更新了，所以需要更新 3D 几何体的位置
         position = SCNVector3Make(anthor.center.x, 0, anthor.center.z)
         
+        let node = childNodes.first
+        node?.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: planeGeometry, options: nil))
+        
         setTextureScale()
         
     }
@@ -66,6 +89,14 @@ class Plane: SCNNode {
         material?.diffuse.contentsTransform = SCNMatrix4MakeScale(Float(width), Float(height), 1)
         material?.diffuse.wrapS = .repeat
         material?.diffuse.wrapT = .repeat
+    }
+    
+    /// 隐藏
+    func hide() {
+        let transparentMaterial = SCNMaterial()
+        transparentMaterial.diffuse.contents = UIColor(white: 1.0, alpha: 0)
+        planeGeometry.materials = [transparentMaterial, transparentMaterial, transparentMaterial,
+        transparentMaterial, transparentMaterial, transparentMaterial]
     }
     
     
