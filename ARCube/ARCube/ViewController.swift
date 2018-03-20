@@ -123,6 +123,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
      @param anchor 更新后的 anchor。
      */
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
+        guard let plane = planes[anchor.identifier] else { return }
+        
+        // anchor 更新后也需要更新 3D 几何体。例如平面检测的高度和宽度可能会改变，所以需要更新 SceneKit 几何体以匹配
+        plane.update(anthor: anchor as! ARPlaneAnchor)
         
     }
     
@@ -134,7 +138,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
      @param anchor 被移除的 anchor。
      */
     func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
-        
+        // 如果多个独立平面被发现共属某个大平面，此时会合并它们，并移除这些 node
+        planes.removeValue(forKey: anchor.identifier)
     }
     
     /**

@@ -40,5 +40,17 @@ class Plane: SCNNode {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// 更新平面
+    func update(anthor: ARPlaneAnchor) {
+        // 随着用户移动，平面 plane 的 范围 extend 和 位置 location 可能会更新。
+        // 需要更新 3D 几何体来匹配 plane 的新参数。
+        planeGeometry.width = CGFloat(anthor.extent.x)
+        planeGeometry.height = CGFloat(anthor.extent.z)
+
+        // plane 刚创建时中心点 center 为 0,0,0，node transform 包含了变换参数。
+        // plane 更新后变换没变但 center 更新了，所以需要更新 3D 几何体的位置
+        position = SCNVector3Make(anthor.center.x, 0, anthor.center.z)
+        
+    }
     
 }
