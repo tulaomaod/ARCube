@@ -10,6 +10,14 @@ import UIKit
 import SceneKit
 import ARKit
 
+/// 碰撞类别
+struct CollisonCategory {
+    let rawValue: Int
+    static let bottom = CollisonCategory(rawValue: 1<<0)    // 0
+    static let cube = CollisonCategory(rawValue: 1<<1)      // 2
+    
+}
+
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
@@ -17,6 +25,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     // UUID 表示UUID字符串，可用于唯一标识类型，接口和其他项目。
     /// 字典，存储场景中当前渲染的所有平面
     var planes = [UUID : Plane]()
+    
+    /// 包含场景中渲染的小方格
+    var boxes = [SCNNode]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,6 +86,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         configuration.planeDetection = .horizontal
         // Run the view's session
         sceneView.session.run(configuration)
+    }
+    
+    //
+    func setupRecognizers() {
+        
     }
 
     // MARK: - ARSCNViewDelegate
