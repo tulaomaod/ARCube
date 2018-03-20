@@ -32,7 +32,7 @@ class Plane: SCNNode {
         
         // SceneKit 里的平面默认是垂直的，所以需要旋转90度来匹配 ARKit 中的平面
         planeNode.transform = SCNMatrix4MakeRotation(-.pi / 2.0, 1.0, 0, 0)
-        
+        setTextureScale()
         addChildNode(planeNode)
     }
     
@@ -51,6 +51,22 @@ class Plane: SCNNode {
         // plane 更新后变换没变但 center 更新了，所以需要更新 3D 几何体的位置
         position = SCNVector3Make(anthor.center.x, 0, anthor.center.z)
         
+        setTextureScale()
+        
     }
+    
+    /// 设置网格纹理
+    func setTextureScale() {
+        let width = planeGeometry.width
+        let height = planeGeometry.height
+        
+        // 平面的宽度/高度 width/height 更新时，我希望 tron grid material 覆盖整个平面，不断重复纹理。
+        // 但如果网格小于 1 个单位，我不希望纹理挤在一起，所以这种情况下通过缩放更新纹理坐标并裁剪纹理
+        let material = planeGeometry.materials.first
+        material?.diffuse.contentsTransform = SCNMatrix4MakeScale(Float(width), Float(height), 1)
+        material?.diffuse.wrapS = .repeat
+        material?.diffuse.wrapT = .repeat
+    }
+    
     
 }
