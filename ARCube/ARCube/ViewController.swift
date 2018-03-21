@@ -37,7 +37,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
         setupScene()
         setupRecognizers()
         
-        insertSpotLight(position: SCNVector3Make(0, 0, 0))
+        // insertSpotLight(position: SCNVector3Make(0, 0, 0))
         
         arConfig = ARWorldTrackingConfiguration()
         // 是否启用光线估计
