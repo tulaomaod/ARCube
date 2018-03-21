@@ -76,7 +76,6 @@ class Plane: SCNNode {
         node?.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(geometry: planeGeometry, options: nil))
         
         setTextureScale()
-        
     }
     
     /// 设置网格纹理
@@ -98,6 +97,7 @@ class Plane: SCNNode {
         transparentMaterial.diffuse.contents = UIColor(white: 1.0, alpha: 0)
         planeGeometry.materials = [transparentMaterial, transparentMaterial, transparentMaterial,
         transparentMaterial, transparentMaterial, transparentMaterial]
+        
     }
     
     
