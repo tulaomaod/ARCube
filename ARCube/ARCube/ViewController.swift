@@ -206,17 +206,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
             return
         }
         // 隐藏所有平面
-//        for (_, plane) in planes {
-//            plane.hide()
-//        }
+        for (_, plane) in planes {
+            plane.hide()
+        }
         
         // 停止检测新平面或更新当前平面
         if let configuration = sceneView.session.configuration as? ARWorldTrackingConfiguration {
-            // configuration.planeDetection = .init(rawValue: 0)
+            configuration.planeDetection = .init(rawValue: 0)
             sceneView.session.run(configuration)
         }
         
-        // sceneView.debugOptions = []
+        sceneView.debugOptions = []
     }
 
     // MARK: - ARSCNViewDelegate
