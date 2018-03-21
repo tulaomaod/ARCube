@@ -32,6 +32,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScene()
+        setupRecognizers()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -87,10 +88,44 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Run the view's session
         sceneView.session.run(configuration)
     }
-    
-    //
+
+    /// 设置手势
     func setupRecognizers() {
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.handleTapFrom(recognizer:)))
+        tapRecognizer.numberOfTapsRequired = 1
+        sceneView.addGestureRecognizer(tapRecognizer)
+    }
+    
+    @objc func handleTapFrom(recognizer: UITapGestureRecognizer) {
+        // 获取屏幕空间坐标并传递给 ARSCNView 实例的 hitTest 方法
+        let tapPoint = recognizer.location(in: sceneView)
+        let result = sceneView.hitTest(tapPoint, types: .existingPlaneUsingExtent)
         
+        // 如果射线与某个平面几何体相交，就会返回该平面，以离摄像头的距离升序排序
+        // 如果命中多次，用距离最近的平面
+        if let hitResult = result.first  {
+            insertGeometry(hitResult)
+        }
+    }
+    
+    /// 插入几何体
+    func insertGeometry(_ hitResult: ARHitTestResult) {
+        // 现在先插入简单的小方块，后面会让它变得更好玩，有更好的纹理和阴影
+        let dimmision: CGFloat = 0.1
+        let cube = SCNBox(width: dimmision, height: dimmision, length: dimmision, chamferRadius: 0)
+        let node = SCNNode(geometry: cube)
+        
+        // physicsBody 会让 SceneKit 用物理引擎控制该几何体
+        node.physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(geometry: cube, options: nil))
+        // kg为单位指定物体质量，静态默认为0，动态为1
+        node.physicsBody?.mass = 2
+        node.physicsBody?.categoryBitMask = CollisonCategory.cube.rawValue
+        
+        // 把几何体插在用户点击的点再稍高一点的位置，以便使用物理引擎来掉落到平面上
+        let insertYOffset: Float = 0.5
+        node.position = SCNVector3Make(hitResult.worldTransform.columns.3.x, hitResult.worldTransform.columns.3.y + insertYOffset, hitResult.worldTransform.columns.3.z)
+        sceneView.scene.rootNode.addChildNode(node)
+        boxes.append(node)
     }
 
     // MARK: - ARSCNViewDelegate
@@ -126,7 +161,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         print(anchor)
-        let plane = Plane(withAnthor: anchor)
+        let plane = Plane(withAnthor: anchor, isHidden: false)
         planes[anchor.identifier] = plane
         node.addChildNode(plane)
     }
