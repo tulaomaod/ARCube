@@ -24,7 +24,6 @@ class Plane: SCNNode {
         let planeHeight:Float = 0.01
         planeGeometry = SCNBox(width: CGFloat(anthor.extent.x), height: CGFloat(planeHeight), length: CGFloat(anthor.extent.z), chamferRadius: 0)
         
-        
         // 网格材质
         let material = SCNMaterial()
         material.diffuse.contents = UIImage(named: "tron_grid")

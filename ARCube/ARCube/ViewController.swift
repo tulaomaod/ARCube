@@ -29,10 +29,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
     /// 包含场景中渲染的小方格
     var boxes = [SCNNode]()
     
+    var arConfig: ARWorldTrackingConfiguration!
+    let spotLight = SCNLight()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupScene()
         setupRecognizers()
+        
+        insertSpotLight(position: SCNVector3Make(0, 0, 0))
+        
+        arConfig = ARWorldTrackingConfiguration()
+        // 是否启用光线估计
+        arConfig.isLightEstimationEnabled = true
+        arConfig.planeDetection = .horizontal
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,6 +60,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Release any cached data, images, etc that aren't in use.
+    }
+    
+    /// 插入光源
+    func insertSpotLight(position: SCNVector3) {
+        spotLight.type = .spot
+        spotLight.intensity = 1000
+        spotLight.spotInnerAngle = 45
+        spotLight.spotOuterAngle = 45
+        
+        let spotNode = SCNNode()
+        spotNode.light = spotLight
+        spotNode.position = position
+        // 欧拉角 表示空间旋转
+        spotNode.eulerAngles = SCNVector3Make(-.pi / 2.0, 0, 0)
+        
+        sceneView.scene.rootNode.addChildNode(spotNode)
+        
     }
     
     /// 设置scene
@@ -240,6 +267,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
     }
      
  */
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        guard let estimate = sceneView.session.currentFrame?.lightEstimate else {
+            return
+        }
+        
+        spotLight.intensity = estimate.ambientIntensity
+        print("光学估算f%", estimate.ambientIntensity)
+    }
     
     /// 有新的node映射到给定的anchor时调用
     ///
