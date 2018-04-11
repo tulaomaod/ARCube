@@ -101,10 +101,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, SCNPhysicsContactDele
         sceneView.autoenablesDefaultLighting = true
         
         // 显示debug信息，arkit中世界原点和arkit检测到的特征点
-        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin]
-        
+        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
     }
-    
     
     /// 设置会话
     func setupSession() {
